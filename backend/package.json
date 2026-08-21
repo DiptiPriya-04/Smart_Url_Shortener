@@ -15,6 +15,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+  "node": "24.x"
+  },
+"scripts": {
   "packageManager": "pnpm@10.18.0",
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -43,4 +47,5 @@
     "ua-parser-js": "^2.0.5",
     "zod": "^4.1.11"
   }
+}
 }

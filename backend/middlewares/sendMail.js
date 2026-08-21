@@ -27,12 +27,12 @@
 import nodemailer from "nodemailer";
 
 export const getTransporter = () => {
-    const emailUser = process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS;
-    const rawPass = process.env.SMTP_PASSWORD || process.env.NODE_CODE_SENDING_EMAIL_PASSWORD || "";
+    const emailUser = (process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS || "diptipriya657@gmail.com").trim();
+    const rawPass = process.env.SMTP_PASSWORD || process.env.NODE_CODE_SENDING_EMAIL_PASSWORD || "blyp gelp lnds rqpz";
     const emailPass = rawPass.replace(/\s+/g, "");
 
-    // 1. Gmail service priority if address is @gmail.com and SMTP_HOST is not a custom non-gmail host
-    if (emailUser && emailUser.includes("@gmail.com") && (!process.env.SMTP_HOST || process.env.SMTP_HOST.includes("gmail") || process.env.SMTP_HOST.includes("brevo"))) {
+    // 1. Gmail service priority if address is @gmail.com
+    if (emailUser.includes("@gmail.com")) {
         return nodemailer.createTransport({
             service: "gmail",
             auth: {

@@ -144,8 +144,9 @@ export const sendVerificationCode = async (req, res) => {
 
         // Send the verification code email
         try {
+            const senderEmail = process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS || "diptipriya657@gmail.com";
             const mailOptions = {
-                from: process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS,
+                from: `URL Shortener <${senderEmail}>`,
                 to: normalizedEmail,
                 subject: "Your Verification Code",
                 html: `
@@ -422,8 +423,9 @@ export const sendForgotPasswordCode = async (req, res) => {
 
         // Send email
         try {
+            const senderEmail = process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS || "diptipriya657@gmail.com";
             const info = await transport.sendMail({
-                from: process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS,
+                from: `URL Shortener <${senderEmail}>`,
                 to: normalizedEmail,
                 subject: "Password Reset Code",
                 html: `

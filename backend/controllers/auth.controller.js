@@ -142,7 +142,7 @@ export const sendVerificationCode = async (req, res) => {
            if (info?.data?.id) {
                 return successResponse(res, 200, "Verification code sent successfully");
             } else {
-                console.error(`Failed to send email to ${normalizedEmail}: ${info.rejected}`);
+              console.error("Resend error:", info?.error);
                 return errorResponse(res, 500, "Failed to send verification email");
             }
         } catch (emailError) {

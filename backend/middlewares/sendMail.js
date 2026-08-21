@@ -26,17 +26,49 @@
 
 import nodemailer from "nodemailer";
 
-const smtpHost = process.env.SMTP_HOST || "smtp-relay.brevo.com";
-const smtpPort = Number(process.env.SMTP_PORT || 587);
-const smtpUser = process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS;
-const smtpPass = process.env.SMTP_PASSWORD || process.env.NODE_CODE_SENDING_EMAIL_PASSWORD;
+const getTransporter = () => {
+    const emailUser = process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS;
+    const rawPass = process.env.SMTP_PASSWORD || process.env.NODE_CODE_SENDING_EMAIL_PASSWORD || "";
+    const emailPass = rawPass.replace(/\s+/g, "");
 
-export const transport = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpPort === 465,
-    auth: {
-        user: smtpUser,
-        pass: smtpPass,
-    },
-});
+    // 1. Explicit SMTP host configured (e.g. Brevo, SendGrid, Mailgun)
+    if (process.env.SMTP_HOST) {
+        const port = Number(process.env.SMTP_PORT || 587);
+        return nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port,
+            secure: port === 465,
+            auth: {
+                user: emailUser,
+                pass: emailPass,
+            },
+        });
+    }
+
+    // 2. Gmail address / Gmail service
+    if (emailUser && emailUser.includes("@gmail.com")) {
+        return nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: emailUser,
+                pass: emailPass,
+            },
+            tls: {
+                rejectUnauthorized: false,
+            },
+        });
+    }
+
+    // 3. Fallback Brevo relay
+    return nodemailer.createTransport({
+        host: "smtp-relay.brevo.com",
+        port: 587,
+        secure: false,
+        auth: {
+            user: emailUser,
+            pass: emailPass,
+        },
+    });
+};
+
+export const transport = getTransporter();

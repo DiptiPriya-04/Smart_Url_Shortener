@@ -49,12 +49,11 @@ export function SignUp() {
                 password: formData.password,
             },
             {
-                onSuccess: () => {
-                    // Prevent multiple executions
+                onSuccess: (res: any) => {
                     if (signupSuccessRef.current) return;
                     signupSuccessRef.current = true;
                     
-                    toast.success("Account created successfully!");
+                    toast.success(res?.message || "Account created successfully!");
 
                     // Send verification code
                     sendVerificationCode(formData.email, {
@@ -81,10 +80,27 @@ export function SignUp() {
                 },
                 onError: (err: any) => {
                     console.error("Signup error:", err);
+                    const errorObj = err?.response?.data || err;
                     const message =
-                        err?.response?.data?.message ||
+                        errorObj?.error ||
+                        errorObj?.message ||
                         err?.message ||
                         "Signup failed. Please try again.";
+
+                    // If user is unverified, offer sending OTP and navigate to /otp
+                    if (errorObj?.unverified || message.toLowerCase().includes("unverified") || message.toLowerCase().includes("already exists")) {
+                        toast.error("Account exists but is unverified. Sending verification code...");
+                        sendVerificationCode(formData.email, {
+                            onSuccess: () => {
+                                navigate("/otp", { state: { email: formData.email, purpose: "verify-email" } });
+                            },
+                            onError: () => {
+                                navigate("/otp", { state: { email: formData.email, purpose: "verify-email" } });
+                            }
+                        });
+                        return;
+                    }
+
                     toast.error(message);
                 },
             }

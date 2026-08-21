@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useLogin } from "@/hooks/useUserQueries";
+import { useLogin, useSendVerificationCode } from "@/hooks/useUserQueries";
 import { toast } from "react-hot-toast";
 
 export function SignIn() {
@@ -22,7 +22,9 @@ export function SignIn() {
         password: "",
     });
 
-    const { mutate: login, isPending } = useLogin();
+    const { mutate: login, isPending: isLoggingIn } = useLogin();
+    const { mutate: sendVerificationCode, isPending: isSendingCode } = useSendVerificationCode();
+    const isPending = isLoggingIn || isSendingCode;
 
     // Check for verification success message from navigation state
     useState(() => {
@@ -54,11 +56,27 @@ export function SignIn() {
                 },
                 onError: (err: any) => {
                     console.error("Login error:", err);
+                    const errorObj = err?.response?.data || err;
                     const message =
-                        err?.response?.data?.error ||
-                        err?.response?.data?.message ||
+                        errorObj?.error ||
+                        errorObj?.message ||
                         err?.message ||
                         "Login failed. Please try again.";
+
+                    // If account is unverified, trigger verification email and navigate to /otp
+                    if (errorObj?.unverified || message.toLowerCase().includes("verify")) {
+                        toast.error("Account not verified yet. Sending verification code...");
+                        sendVerificationCode(formData.email, {
+                            onSuccess: () => {
+                                navigate("/otp", { state: { email: formData.email, purpose: "verify-email" } });
+                            },
+                            onError: () => {
+                                navigate("/otp", { state: { email: formData.email, purpose: "verify-email" } });
+                            }
+                        });
+                        return;
+                    }
+
                     toast.error(message);
                 },
             }

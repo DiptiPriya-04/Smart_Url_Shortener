@@ -45,6 +45,25 @@ export const signup = async (req, res) => {
 
         const existingUser = await getUserByEmail(email);
         if (existingUser) {
+            if (!existingUser.verified) {
+                const { salt, password: hashedPassword } = await hashPasswordWithSalt(password);
+                await db
+                    .update(usersTable)
+                    .set({
+                        firstname: firstname.trim(),
+                        lastname: lastname.trim(),
+                        password: hashedPassword,
+                        salt,
+                        updatedAt: new Date(),
+                    })
+                    .where(eq(usersTable.id, existingUser.id));
+
+                return successResponse(res, 200, "Account exists but is unverified. Verification code sent!", {
+                    userId: existingUser.id,
+                    email: existingUser.email,
+                    unverified: true
+                });
+            }
             return errorResponse(res, 400, `User with email ${email} already exists`);
         }
 
@@ -242,7 +261,13 @@ export const login = async (req, res) => {
         }
 
         if (!user.verified) {
-            return errorResponse(res, 403, "Please verify your email before logging in");
+            return res.status(403).json({
+                success: false,
+                unverified: true,
+                email: normalizedEmail,
+                error: "Please verify your email before logging in",
+                message: "Please verify your email before logging in"
+            });
         }
 
         // Verify password with simple comparison for debugging

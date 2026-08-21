@@ -11,11 +11,12 @@ export const hashPasswordWithSalt = async (password, userSalt = undefined) => {
 }
 
 export const hmacProcess = async (value, key) => {
-    const result = createHmac("sha256", key)
+    const secretKey = key || process.env.HMAC_VERIFICATION_CODE_SECRET || "default_hmac_verification_secret_key_12345";
+    const result = createHmac("sha256", secretKey)
         .update(value)
-        .digest("hex")
+        .digest("hex");
     return result;
-}
+};
 
 export const comparePasswords = async (plainPassword, hashedPassword, salt) => {
     const { password: computedHash } = await hashPasswordWithSalt(plainPassword, salt);

@@ -28,8 +28,9 @@ export const useUserInfo = () => {
         queryFn: getUserInfo,
         staleTime: 1000 * 60 * 5, // 5 min
         retry: (failureCount, error: any) => {
-            // Don't retry on 401 (Unauthorized)
-            if (error?.response?.status === 401) {
+            // Don't retry on 401 (Unauthorized) or 403
+            const status = error?.response?.status;
+            if (status === 401 || status === 403) {
                 return false;
             }
             return failureCount < 3;

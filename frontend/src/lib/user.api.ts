@@ -11,7 +11,7 @@ import type {
 // Helper func for error handling
 const handleError = (error: any) => {
     console.error("API Error:", error.response?.data || error.message);
-    throw error.response?.data || { message: "Something went wrong. Please try again." };
+    throw error;
 };
 
 // Signup and login

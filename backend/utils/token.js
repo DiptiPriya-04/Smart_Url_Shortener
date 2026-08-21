@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { userTokenSchema } from "../validation/token.validation.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "default_jwt_secret_key_67890";
 
 export const createUserToken = async (payload) =>{
     const validationResult = await userTokenSchema.safeParseAsync(payload);

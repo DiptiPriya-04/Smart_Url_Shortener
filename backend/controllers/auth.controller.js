@@ -137,14 +137,14 @@ export const sendVerificationCode = async (req, res) => {
                 `,
             };
 
-            const info = await transport.sendMail(mailOptions);
+          const info = await transport.sendMail(mailOptions);
 
-           if (info?.data?.id) {
-                return successResponse(res, 200, "Verification code sent successfully");
-            } else {
-              console.error("Resend error:", info?.error);
-                return errorResponse(res, 500, "Failed to send verification email");
-            }
+if (info?.messageId) {
+    return successResponse(res, 200, "Verification code sent successfully");
+} else {
+    console.error("Email send failed:", info);
+    return errorResponse(res, 500, "Failed to send verification email");
+}
         } catch (emailError) {
             console.error("Email error:", emailError);
             return errorResponse(res, 500, "Failed to send verification email");

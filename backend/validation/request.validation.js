@@ -19,7 +19,7 @@ export const shortenBodySchema = z.object({
 
 export const acceptCodeSchema = z.object({
     email: z.string().email(),
-    providedCode: z.number().int(),
+    providedCode: z.union([z.number().int(), z.string()]),
 });
 
 export const changePasswordSchema = z.object({
@@ -29,7 +29,7 @@ export const changePasswordSchema = z.object({
 
 export const acceptFPCodeSchema = z.object({
     email: z.string().email(),
-    providedCode: z.number().int(),
+    providedCode: z.union([z.number().int(), z.string()]),
     newPassword: z.string().min(3),
 });
 

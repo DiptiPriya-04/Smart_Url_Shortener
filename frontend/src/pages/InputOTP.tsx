@@ -34,7 +34,7 @@ export function OTPPage() {
                 toast.success("Verification code sent successfully!")
             },
             onError: (err: any) => {
-                toast.error(err?.response?.data?.message || "Failed to send code")
+                toast.error(err?.response?.data?.error || err?.response?.data?.message || "Failed to send code")
             }
         })
     }
@@ -73,7 +73,7 @@ export function OTPPage() {
                 },
                 onError: (err: any) => {
                     console.error("Verification error:", err); // Add console log for debugging
-                    toast.error(err?.response?.data?.message || "Verification failed")
+                    toast.error(err?.response?.data?.error || err?.response?.data?.message || "Verification failed")
                     setOtp("")
                 },
             }

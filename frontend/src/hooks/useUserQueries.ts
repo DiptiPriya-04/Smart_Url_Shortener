@@ -49,6 +49,7 @@ export const useSignup = () => {
         },
         onError: (err: any) => {
             const message =
+                err?.response?.data?.error ||
                 err?.response?.data?.message ||
                 err?.message ||
                 "Signup failed. Please try again.";
@@ -66,6 +67,7 @@ export const useLogin = () => {
         },
         onError: (err: any) => {
             const message =
+                err?.response?.data?.error ||
                 err?.response?.data?.message ||
                 err?.message ||
                 "Login failed. Please try again.";
@@ -85,6 +87,7 @@ export const useLogout = () => {
         },
         onError: (err: any) => {
             const message =
+                err?.response?.data?.error ||
                 err?.response?.data?.message ||
                 err?.message ||
                 "Logout failed. Please try again.";
@@ -106,6 +109,7 @@ export const useChangeName = () => {
         },
         onError: (err: any) => {
             const message =
+                err?.response?.data?.error ||
                 err?.response?.data?.message ||
                 err?.message ||
                 "Failed to update name. Please try again.";
@@ -122,6 +126,7 @@ export const useChangePassword = () => {
         },
         onError: (err: any) => {
             const message =
+                err?.response?.data?.error ||
                 err?.response?.data?.message ||
                 err?.message ||
                 "Failed to change password. Please try again.";
@@ -139,6 +144,7 @@ export const useSendVerificationCode = () => {
         },
         onError: (err: any) => {
             const message =
+                err?.response?.data?.error ||
                 err?.response?.data?.message ||
                 err?.message ||
                 "Failed to send verification code. Please try again.";
@@ -155,6 +161,7 @@ export const useVerifyVerificationCode = () => {
         },
         onError: (err: any) => {
             const message =
+                err?.response?.data?.error ||
                 err?.response?.data?.message ||
                 err?.message ||
                 "Failed to verify code. Please try again.";
@@ -172,6 +179,7 @@ export const useSendForgotPasswordCode = () => {
         },
         onError: (err: any) => {
             const message =
+                err?.response?.data?.error ||
                 err?.response?.data?.message ||
                 err?.message ||
                 "Failed to send reset code. Please try again.";
@@ -188,6 +196,7 @@ export const useVerifyForgotPasswordCode = () => {
         },
         onError: (err: any) => {
             const message =
+                err?.response?.data?.error ||
                 err?.response?.data?.message ||
                 err?.message ||
                 "Failed to reset password. Please try again.";

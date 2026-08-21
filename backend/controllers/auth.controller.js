@@ -19,7 +19,8 @@ import crypto from 'crypto';
 const errorResponse = (res, status, message) => {
     return res.status(status).json({
         success: false,
-        error: message
+        error: message,
+        message
     });
 };
 
@@ -125,7 +126,7 @@ export const sendVerificationCode = async (req, res) => {
         // Send the verification code email
         try {
             const mailOptions = {
-                from: process.env.SMTP_USER,
+                from: process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS,
                 to: normalizedEmail,
                 subject: "Your Verification Code",
                 html: `
@@ -137,14 +138,14 @@ export const sendVerificationCode = async (req, res) => {
                 `,
             };
 
-          const info = await transport.sendMail(mailOptions);
+            const info = await transport.sendMail(mailOptions);
 
-if (info?.messageId) {
-    return successResponse(res, 200, "Verification code sent successfully");
-} else {
-    console.error("Email send failed:", info);
-    return errorResponse(res, 500, "Failed to send verification email");
-}
+            if (info?.messageId || (Array.isArray(info?.accepted) && info.accepted.length > 0)) {
+                return successResponse(res, 200, "Verification code sent successfully");
+            } else {
+                console.error("Email send failed:", info);
+                return errorResponse(res, 500, "Failed to send verification email");
+            }
         } catch (emailError) {
             console.error("Email error:", emailError);
             return errorResponse(res, 500, "Failed to send verification email");
@@ -397,7 +398,7 @@ export const sendForgotPasswordCode = async (req, res) => {
         // Send email
         try {
             const info = await transport.sendMail({
-                from: process.env.SMTP_USER,
+                from: process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS,
                 to: normalizedEmail,
                 subject: "Password Reset Code",
                 html: `
@@ -410,9 +411,10 @@ export const sendForgotPasswordCode = async (req, res) => {
                 `,
             });
 
-            if (info.accepted.includes(normalizedEmail)) {
+            if (info?.messageId || (Array.isArray(info?.accepted) && info.accepted.length > 0)) {
                 return successResponse(res, 200, "Password reset code sent successfully");
             } else {
+                console.error("Email send failed:", info);
                 return errorResponse(res, 500, "Failed to send reset email");
             }
         } catch (emailError) {

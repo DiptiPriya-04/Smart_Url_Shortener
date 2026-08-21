@@ -139,7 +139,7 @@ export const sendVerificationCode = async (req, res) => {
 
             const info = await transport.sendMail(mailOptions);
 
-            if (info.accepted.includes(normalizedEmail)) {
+           if (info?.data?.id) {
                 return successResponse(res, 200, "Verification code sent successfully");
             } else {
                 console.error(`Failed to send email to ${normalizedEmail}: ${info.rejected}`);

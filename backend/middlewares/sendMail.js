@@ -24,17 +24,14 @@
 //     },
 // });
 
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-export const transport = {
-    sendMail: async ({ from, to, subject, html }) => {
-        return await resend.emails.send({
-            from,
-            to,
-            subject,
-            html,
-        });
+export const transport = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: false,
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
     },
-};
+});

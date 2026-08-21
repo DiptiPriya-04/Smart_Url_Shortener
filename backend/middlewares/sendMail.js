@@ -26,12 +26,26 @@
 
 import nodemailer from "nodemailer";
 
-const getTransporter = () => {
+export const getTransporter = () => {
     const emailUser = process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS;
     const rawPass = process.env.SMTP_PASSWORD || process.env.NODE_CODE_SENDING_EMAIL_PASSWORD || "";
     const emailPass = rawPass.replace(/\s+/g, "");
 
-    // 1. Explicit SMTP host configured (e.g. Brevo, SendGrid, Mailgun)
+    // 1. Gmail service priority if address is @gmail.com and SMTP_HOST is not a custom non-gmail host
+    if (emailUser && emailUser.includes("@gmail.com") && (!process.env.SMTP_HOST || process.env.SMTP_HOST.includes("gmail") || process.env.SMTP_HOST.includes("brevo"))) {
+        return nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: emailUser,
+                pass: emailPass,
+            },
+            tls: {
+                rejectUnauthorized: false,
+            },
+        });
+    }
+
+    // 2. Explicit custom SMTP host configured
     if (process.env.SMTP_HOST) {
         const port = Number(process.env.SMTP_PORT || 587);
         return nodemailer.createTransport({
@@ -41,20 +55,6 @@ const getTransporter = () => {
             auth: {
                 user: emailUser,
                 pass: emailPass,
-            },
-        });
-    }
-
-    // 2. Gmail address / Gmail service
-    if (emailUser && emailUser.includes("@gmail.com")) {
-        return nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: emailUser,
-                pass: emailPass,
-            },
-            tls: {
-                rejectUnauthorized: false,
             },
         });
     }
@@ -71,4 +71,11 @@ const getTransporter = () => {
     });
 };
 
-export const transport = getTransporter();
+export const transport = {
+    sendMail: async (options) => {
+        const transporter = getTransporter();
+        const targetHost = transporter.options?.service || transporter.options?.host || "default";
+        console.log(`[SMTP] Sending email to ${options.to} via ${targetHost}...`);
+        return await transporter.sendMail(options);
+    }
+};

@@ -167,7 +167,7 @@ export const sendVerificationCode = async (req, res) => {
             }
         } catch (emailError) {
             console.error("Email error:", emailError);
-            return errorResponse(res, 500, "Failed to send verification email");
+            return errorResponse(res, 500, `Failed to send verification email: ${emailError.message || emailError}`);
         }
     } catch (error) {
         console.error("Send verification code error:", error);
@@ -444,7 +444,7 @@ export const sendForgotPasswordCode = async (req, res) => {
             }
         } catch (emailError) {
             console.error("Email error:", emailError);
-            return errorResponse(res, 500, "Failed to send reset email");
+            return errorResponse(res, 500, `Failed to send reset email: ${emailError.message || emailError}`);
         }
     } catch (error) {
         console.error("Send forgot password code error:", error);

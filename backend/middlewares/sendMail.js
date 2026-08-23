@@ -1,81 +1,43 @@
-// import nodemailer from "nodemailer"
-
-// export const transport = nodemailer.createTransport({
-//   host: 'smtp-relay.brevo.com',
-//   port: 587,
-//   auth: {
-//     user: process.env.SMTP_USER, // Ensure this is set in your env variables
-//     pass: process.env.SMTP_PASSWORD, // Use an app password if using Gmail
-//   },
-// });
-
-// import nodemailer from "nodemailer"
-
-// export const transport = nodemailer.createTransport({
-//     service: "gmail",
-//     auth: {
-//         user: process.env.NODE_CODE_SENDING_EMAIL_ADDRESS,
-//         pass: process.env.NODE_CODE_SENDING_EMAIL_PASSWORD,
-//     },
-//     // only for local testing and not for production
-//     // this helps when you face SSL cert issues locally - self signed certificate issue
-//     tls: {
-//         rejectUnauthorized: false,
-//     },
-// });
-
 import nodemailer from "nodemailer";
 
+let transporter;
+
 export const getTransporter = () => {
-    const emailUser = (process.env.SMTP_USER || process.env.NODE_CODE_SENDING_EMAIL_ADDRESS || "diptipriya657@gmail.com").trim();
-    const rawPass = process.env.SMTP_PASSWORD || process.env.NODE_CODE_SENDING_EMAIL_PASSWORD || "blyp gelp lnds rqpz";
-    const emailPass = rawPass.replace(/\s+/g, "");
+  if (transporter) return transporter;
 
-    // 1. Gmail service priority if address is @gmail.com
-    if (emailUser.includes("@gmail.com")) {
-        return nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: emailUser,
-                pass: emailPass,
-            },
-            tls: {
-                rejectUnauthorized: false,
-            },
-        });
-    }
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASSWORD;
 
-    // 2. Explicit custom SMTP host configured
-    if (process.env.SMTP_HOST) {
-        const port = Number(process.env.SMTP_PORT || 587);
-        return nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port,
-            secure: port === 465,
-            auth: {
-                user: emailUser,
-                pass: emailPass,
-            },
-        });
-    }
+  if (!user || !pass) {
+    throw new Error(
+      "Missing SMTP_USER or SMTP_PASSWORD environment variables. Set them in Render's Environment tab."
+    );
+  }
 
-    // 3. Fallback Brevo relay
-    return nodemailer.createTransport({
-        host: "smtp-relay.brevo.com",
-        port: 587,
-        secure: false,
-        auth: {
-            user: emailUser,
-            pass: emailPass,
-        },
-    });
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: false, // Brevo uses STARTTLS on 587, not SSL
+    auth: {
+      user,
+      pass: pass.trim(),
+    },
+  });
+
+  return transporter;
 };
 
 export const transport = {
-    sendMail: async (options) => {
-        const transporter = getTransporter();
-        const targetHost = transporter.options?.service || transporter.options?.host || "default";
-        console.log(`[SMTP] Sending email to ${options.to} via ${targetHost}...`);
-        return await transporter.sendMail(options);
+  sendMail: async (options) => {
+    const t = getTransporter();
+    console.log(`[SMTP] Sending email to ${options.to} via ${t.options.host}...`);
+    try {
+      const info = await t.sendMail(options);
+      console.log(`[SMTP] Sent. Message ID: ${info.messageId}`);
+      return info;
+    } catch (err) {
+      console.error(`[SMTP] Failed to send email to ${options.to}:`, err.message);
+      throw err; // re-throw so the caller (your OTP controller) knows it failed
     }
-};
+  },
+};

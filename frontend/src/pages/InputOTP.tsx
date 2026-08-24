@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
+import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useVerifyVerificationCode, useSendVerificationCode } from "@/hooks/useUserQueries"
@@ -14,6 +15,7 @@ import {
 export function OTPPage() {
     const location = useLocation()
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const [otp, setOtp] = useState("")
 
     const { mutate: verifyCode, isPending: isVerifying } = useVerifyVerificationCode()
@@ -56,23 +58,20 @@ export function OTPPage() {
             { email, providedCode: otpNumber },
             {
                 onSuccess: (res: any) => {
-                    // Show success toast with longer duration
-                    toast.success(res?.message || "Email verified successfully!", {
-                        duration: 3000, // 3 seconds
+                    toast.success(res?.message || "Account verified & logged in!", {
+                        duration: 2000,
                     })
 
-                    // Wait longer before navigation to ensure user sees the toast
+                    // Invalidate userInfo to refresh user state
+                    queryClient.invalidateQueries({ queryKey: ["userInfo"] })
+
+                    // Navigate directly to home dashboard
                     setTimeout(() => {
-                        navigate("/signin", {
-                            state: { 
-                                message: "Your account has been verified. Please sign in.",
-                                showToast: true // Add flag for signin page to show toast
-                            },
-                        })
-                    }, 2000) // 2 seconds delay
+                        navigate("/", { replace: true })
+                    }, 1000)
                 },
                 onError: (err: any) => {
-                    console.error("Verification error:", err); // Add console log for debugging
+                    console.error("Verification error:", err);
                     toast.error(err?.response?.data?.error || err?.response?.data?.message || "Verification failed")
                     setOtp("")
                 },

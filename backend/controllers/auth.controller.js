@@ -238,7 +238,28 @@ export const verifyVerificationCode = async (req, res) => {
             })
             .where(eq(usersTable.email, normalizedEmail));
 
-        return successResponse(res, 200, "Account verified successfully");
+        // Create JWT token and log user in automatically
+        const token = await createUserToken({
+            id: user.id,
+            email: user.email
+        });
+
+        // Set secure cookie
+        res.cookie("Authorization", `Bearer ${token}`, {
+            expires: new Date(Date.now() + 8 * 60 * 60 * 1000), // 8 hours
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+        });
+
+        return successResponse(res, 200, "Account verified and logged in successfully", {
+            token,
+            user: {
+                id: user.id,
+                email: user.email
+            }
+        });
     } catch (error) {
         console.error("Verify verification code error:", error);
         return errorResponse(res, 500, "Internal server error");

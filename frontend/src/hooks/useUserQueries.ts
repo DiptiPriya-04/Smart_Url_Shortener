@@ -23,18 +23,15 @@ import { toast } from "react-hot-toast";
 
 // -------------------- Get User Info --------------------
 export const useUserInfo = () => {
+    const path = typeof window !== "undefined" ? window.location.pathname : "";
+    const isAuthPage = ["/signin", "/signup", "/otp", "/forgot-password"].includes(path);
+
     return useQuery({
         queryKey: ["userInfo"],
         queryFn: getUserInfo,
+        enabled: !isAuthPage,
         staleTime: 1000 * 60 * 5, // 5 min
-        retry: (failureCount, error: any) => {
-            // Don't retry on 401 (Unauthorized) or 403
-            const status = error?.response?.status;
-            if (status === 401 || status === 403) {
-                return false;
-            }
-            return failureCount < 3;
-        },
+        retry: false,
     });
 };
 

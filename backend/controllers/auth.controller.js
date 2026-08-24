@@ -148,11 +148,12 @@ export const sendVerificationCode = async (req, res) => {
             const mailOptions = {
                 from: `URL Shortener <${senderEmail}>`,
                 to: normalizedEmail,
-                subject: "Your Verification Code",
+                subject: `Your Verification Code: ${codeValue}`,
+                text: `Your Smart URL Shortener verification code is: ${codeValue}. This code will expire in 5 minutes.`,
                 html: `
-                    <div style="font-family: Arial, sans-serif; text-align: center;">
+                    <div style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
                         <h2>Your Verification Code</h2>
-                        <p style="font-size: 22px; font-weight: bold;">${codeValue}</p>
+                        <p style="font-size: 28px; font-weight: bold; letter-spacing: 4px; color: #2563eb;">${codeValue}</p>
                         <p>This code will expire in 5 minutes.</p>
                     </div>
                 `,
@@ -448,13 +449,14 @@ export const sendForgotPasswordCode = async (req, res) => {
             const info = await transport.sendMail({
                 from: `URL Shortener <${senderEmail}>`,
                 to: normalizedEmail,
-                subject: "Password Reset Code",
+                subject: `Password Reset Code: ${codeValue}`,
+                text: `Your password reset code is: ${codeValue}. This code will expire in 5 minutes.`,
                 html: `
-                    <div style="font-family: Arial, sans-serif; text-align: center;">
-                    <h2>Password Reset Request</h2>
-                    <p style="font-size: 18px;">Your password reset code is:</p>
-                    <p style="font-size: 24px; font-weight: bold; letter-spacing: 2px;">${codeValue}</p>
-                    <p>This code will expire in 5 minutes.</p>
+                    <div style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
+                        <h2>Password Reset Request</h2>
+                        <p style="font-size: 18px;">Your password reset code is:</p>
+                        <p style="font-size: 28px; font-weight: bold; letter-spacing: 4px; color: #2563eb;">${codeValue}</p>
+                        <p>This code will expire in 5 minutes.</p>
                     </div>
                 `,
             });
